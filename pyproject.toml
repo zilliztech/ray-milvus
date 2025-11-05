@@ -1,0 +1,16 @@
+[project]
+name = "milvus_ray"
+version = "0.1.0"
+description = "Ray Data datasource and datasink for Milvus Storage"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ray[data]>=2.51.1",
+    "pyarrow>=21.0.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
