@@ -11,7 +11,7 @@ import os
 
 def test_import():
     """Test that the package can be imported."""
-    from milvus_ray import MilvusDatasource, MilvusDatasink, read_milvus, write_milvus
+    from ray_milvus import MilvusDatasource, MilvusDatasink, read_milvus, write_milvus
 
     assert MilvusDatasource is not None
     assert MilvusDatasink is not None

@@ -1,10 +1,10 @@
-# milvus_ray
+# ray-milvus
 
 Ray Data integration for Milvus Storage, providing efficient datasource and datasink implementations for reading from and writing to Milvus Storage format.
 
 ## Overview
 
-`milvus_ray` enables seamless integration between [Ray Data](https://docs.ray.io/en/latest/data/data.html) and [Milvus Storage](https://github.com/milvus-io/milvus-storage), allowing you to:
+`ray-milvus` enables seamless integration between [Ray Data](https://docs.ray.io/en/latest/data/data.html) and [Milvus Storage](https://github.com/milvus-io/milvus-storage), allowing you to:
 
 - Read data from Milvus Storage into Ray Datasets for distributed processing
 - Write Ray Datasets to Milvus Storage format (Apache Arrow/Parquet)
@@ -15,14 +15,14 @@ Ray Data integration for Milvus Storage, providing efficient datasource and data
 
 ```bash
 # Using pip
-pip install milvus_ray
+pip install ray-milvus
 
 # Using uv
-uv add milvus_ray
+uv add ray-milvus
 
 # For development
-git clone https://github.com/your-repo/milvus_ray.git
-cd milvus_ray
+git clone https://github.com/your-repo/ray-milvus.git
+cd ray-milvus
 uv sync
 ```
 
@@ -41,7 +41,7 @@ uv sync
 ```python
 import ray
 import pyarrow as pa
-from milvus_ray import write_milvus
+from ray_milvus import write_milvus
 
 # Initialize Ray
 ray.init()
@@ -66,7 +66,7 @@ write_milvus(
 ### Reading Data from Milvus Storage
 
 ```python
-from milvus_ray import read_milvus
+from ray_milvus import read_milvus
 
 # Define column groups (JSON manifest)
 column_groups = '''
@@ -107,7 +107,7 @@ Ray Data datasource for reading from Milvus Storage.
 **Usage:**
 ```python
 import ray
-from milvus_ray import MilvusDatasource
+from ray_milvus import MilvusDatasource
 
 datasource = MilvusDatasource(
     column_groups=[column_groups_json],
@@ -132,7 +132,7 @@ Ray Data datasink for writing to Milvus Storage.
 
 **Usage:**
 ```python
-from milvus_ray import MilvusDatasink
+from ray_milvus import MilvusDatasink
 
 datasink = MilvusDatasink(
     path="/tmp/output",
@@ -180,7 +180,7 @@ ds = read_milvus(
 ```python
 import ray
 import numpy as np
-from milvus_ray import read_milvus, write_milvus
+from ray_milvus import read_milvus, write_milvus
 
 # Read data
 ds = read_milvus(column_groups, schema, properties)
@@ -321,8 +321,8 @@ def write_milvus(
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/milvus_ray.git
-cd milvus_ray
+git clone https://github.com/your-repo/ray-milvus.git
+cd ray-milvus
 
 # Install with dev dependencies
 uv sync
@@ -338,7 +338,7 @@ pytest tests/
 pytest
 
 # Run with coverage
-pytest --cov=milvus_ray
+pytest --cov=ray_milvus
 
 # Run specific test file
 pytest tests/test_integration.py

@@ -11,7 +11,7 @@ This example demonstrates:
 import ray
 import pyarrow as pa
 import pandas as pd
-from milvus_ray import read_milvus, write_milvus
+from ray_milvus import read_milvus, write_milvus
 
 
 def main():

@@ -20,7 +20,7 @@ class MilvusDatasink(Datasink):
     Example:
         >>> import ray
         >>> import pyarrow as pa
-        >>> from milvus_ray import MilvusDatasink
+        >>> from ray_milvus import MilvusDatasink
         >>>
         >>> # Create a Ray dataset
         >>> ds = ray.data.range(100)
@@ -151,7 +151,7 @@ def write_milvus(
     Example:
         >>> import ray
         >>> import pyarrow as pa
-        >>> from milvus_ray import write_milvus
+        >>> from ray_milvus import write_milvus
         >>>
         >>> # Create dataset
         >>> ds = ray.data.range(1000)

@@ -1,5 +1,5 @@
 [project]
-name = "milvus_ray"
+name = "ray-milvus"
 version = "0.1.0"
 description = "Ray Data datasource and datasink for Milvus Storage"
 readme = "README.md"

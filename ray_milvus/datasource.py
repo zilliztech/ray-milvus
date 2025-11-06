@@ -19,7 +19,7 @@ class MilvusDatasource(Datasource):
 
     Example:
         >>> import ray
-        >>> from milvus_ray import MilvusDatasource
+        >>> from ray_milvus import MilvusDatasource
         >>>
         >>> # Read column groups
         >>> column_groups = ['{"segments": [{"path": "/tmp/cg1"}]}']
@@ -174,7 +174,7 @@ def read_milvus(
     Example:
         >>> import ray
         >>> import pyarrow as pa
-        >>> from milvus_ray import read_milvus
+        >>> from ray_milvus import read_milvus
         >>>
         >>> schema = pa.schema([
         ...     pa.field("id", pa.int64()),
