@@ -5,9 +5,10 @@ This module provides a callable class for calculating vector similarity
 that can be passed as an argument to Ray Data's map_batches method.
 """
 
+from typing import List, Union
+
 import numpy as np
 import pyarrow as pa
-from typing import Union, List
 
 
 class VectorSimilarityCalculator:
@@ -56,7 +57,7 @@ class VectorSimilarityCalculator:
         metric: str = "COSINE",
         threshold: float = 0.8,
         vector_col: str = "vector",
-        output_score_col: str = "similarity"
+        output_score_col: str = "similarity",
     ):
         """Initialize the vector similarity calculator."""
         # Convert query vector to numpy array if it's a list

@@ -2,12 +2,13 @@
 Milvus datasink implementation for Ray Data.
 """
 
-from typing import Any, Dict, Iterable, Optional
-import pyarrow as pa
-from ray.data.datasource import Datasink
-from ray.data._internal.execution.interfaces import TaskContext
-from milvus_storage import Writer
 import os
+from typing import Any, Dict, Iterable, Optional
+
+import pyarrow as pa
+from milvus_storage import Writer
+from ray.data._internal.execution.interfaces import TaskContext
+from ray.data.datasource import Datasink
 
 
 class MilvusDatasink(Datasink):
@@ -72,13 +73,13 @@ class MilvusDatasink(Datasink):
         ctx: TaskContext,
     ) -> Dict[str, Any]:
         """
-        Write blocks to Milvus Storage.
+         Write blocks to Milvus Storage.
 
-        Args:
-            blocks: Iterable of data blocks (Arrow tables) to write
-            ctx: Ray task context
-       Returns:
-            Dictionary with metadata about the write operation
+         Args:
+             blocks: Iterable of data blocks (Arrow tables) to write
+             ctx: Ray task context
+        Returns:
+             Dictionary with metadata about the write operation
         """
         # Initialize writer here to avoid serialization issues with CFFI objects
         # Each Ray worker will create its own writer instance

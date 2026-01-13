@@ -3,11 +3,12 @@ Milvus datasource implementation for Ray Data.
 """
 
 from typing import Any, Dict, Iterator, List, Optional, Union
+
 import numpy as np
 import pyarrow as pa
-from ray.data.datasource import Datasource, ReadTask
-from ray.data.block import Block, BlockMetadata
 from milvus_storage import Reader
+from ray.data.block import Block, BlockMetadata
+from ray.data.datasource import Datasource, ReadTask
 
 
 class MilvusDatasource(Datasource):
