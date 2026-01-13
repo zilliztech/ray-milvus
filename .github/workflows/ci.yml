@@ -205,6 +205,7 @@ jobs:
           pip install conan==1.61.0
           conan profile new default --detect || true
           conan profile update settings.compiler.libcxx=libc++ default
+          conan profile update settings.compiler.version=15 default  # Force version for Conan 1.x compatibility
           conan remote add milvus https://milvus01.jfrog.io/artifactory/api/conan/default-conan-local --insert || true
 
       - name: Build milvus-storage C++ library
