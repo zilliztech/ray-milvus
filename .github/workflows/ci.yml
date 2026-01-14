@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, dev]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install lint tools
+        run: pip install flake8 black isort
+
+      - name: Check formatting with black
+        run: black --check ray_milvus/ tests/
+
+      - name: Check imports with isort
+        run: isort --check-only ray_milvus/ tests/
+
+      - name: Lint with flake8
+        run: flake8 ray_milvus/ tests/ --max-line-length=120
+
+  test-linux:
+    name: Test Linux (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Get milvus-storage commit ID
+        id: milvus-storage
+        run: |
+          echo "commit=$(git -C milvus-storage rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Cache native library build
+        id: cache-native
+        uses: actions/cache@v4
+        with:
+          path: |
+            milvus-storage/cpp/build
+            milvus-storage/python/milvus_storage/lib
+          key: native-linux-${{ steps.milvus-storage.outputs.commit }}
+
+      - name: Cache Conan packages
+        if: steps.cache-native.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan
+          key: conan-linux-${{ steps.milvus-storage.outputs.commit }}
+          restore-keys: |
+            conan-linux-
+
+      - name: Cache ccache
+        if: steps.cache-native.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-linux-${{ steps.milvus-storage.outputs.commit }}
+          restore-keys: |
+            ccache-linux-
+
+      - name: Install system dependencies
+        if: steps.cache-native.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache libssl-dev pkg-config
+
+      - name: Install CMake
+        if: steps.cache-native.outputs.cache-hit != 'true'
+        run: |
+          wget -qO- "https://cmake.org/files/v3.27/cmake-3.27.5-linux-x86_64.tar.gz" | \
+            sudo tar --strip-components=1 -xz -C /usr/local
+
+      - name: Install Conan
+        if: steps.cache-native.outputs.cache-hit != 'true'
+        run: |
+          pip install conan==1.61.0
+          conan profile new default --detect || true
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+          conan remote add milvus https://milvus01.jfrog.io/artifactory/api/conan/default-conan-local --insert || true
+
+      - name: Build milvus-storage C++ library
+        if: steps.cache-native.outputs.cache-hit != 'true'
+        run: |
+          cd milvus-storage/cpp
+          make python-lib
+          mkdir -p ../python/milvus_storage/lib
+          cp build/Release/libmilvus-storage.so ../python/milvus_storage/lib/
+        env:
+          CCACHE_DIR: ~/.ccache
+
+      - name: Install Python dependencies
+        run: |
+          pip install pytest pytest-cov pyarrow numpy cffi pandas
+          pip install "ray[data]>=2.51.1"
+
+      - name: Setup milvus_storage Python package
+        run: pip install -e milvus-storage/python/
+
+      - name: Install ray-milvus
+        run: pip install -e .
+
+      - name: Run tests
+        run: pytest tests/ -v --cov=ray_milvus --cov-report=xml
+        env:
+          LD_LIBRARY_PATH: ${{ github.workspace }}/milvus-storage/python/milvus_storage/lib
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.10'
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false

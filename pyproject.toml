@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ray-milvus"
+version = "0.1.0"
+description = "Ray Data datasource and datasink for Milvus Storage"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Zilliz", email = "support@zilliz.com"}
+]
+keywords = ["ray", "milvus", "vector-database", "data-processing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "ray[data]>=2.51.1",
+    "pyarrow>=21.0.0",
+    "numpy>=1.24.0",
+    "cffi>=1.15.0",
+]
+# Note: milvus-storage is required but must be installed separately (not on PyPI)
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/zilliztech/ray-milvus"
+Documentation = "https://github.com/zilliztech/ray-milvus#readme"
+Repository = "https://github.com/zilliztech/ray-milvus.git"
+Issues = "https://github.com/zilliztech/ray-milvus/issues"
+
+[tool.setuptools.packages.find]
+include = ["ray_milvus*"]
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "-v"
+
+[tool.cibuildwheel]
+build = "cp310-* cp311-*"  # Conan 1.x not compatible with Python 3.12
+skip = "*-musllinux*"
+test-requires = ["pytest", "pyarrow", "numpy"]
+test-command = "python -c \"from ray_milvus import MilvusDatasource; print('OK')\""
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux2014"
+before-all = """
+yum install -y epel-release git openssl-devel wget
+wget -qO- "https://cmake.org/files/v3.27/cmake-3.27.5-linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C /usr/local
+pip install conan==1.61.0
+conan profile new default --detect || true
+conan profile update settings.compiler.libcxx=libstdc++11 default
+conan remote add milvus https://milvus01.jfrog.io/artifactory/api/conan/default-conan-local --insert || true
+cd milvus-storage/cpp && make python-lib
+mkdir -p ../python/milvus_storage/lib
+cp build/Release/libmilvus-storage.so ../python/milvus_storage/lib/
+"""
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel} --plat manylinux2014_x86_64"
+
+[tool.cibuildwheel.macos]
+before-all = """
+brew install cmake
+pip install conan==1.61.0
+conan profile new default --detect || true
+conan profile update settings.compiler.libcxx=libc++ default
+conan remote add milvus https://milvus01.jfrog.io/artifactory/api/conan/default-conan-local --insert || true
+cd milvus-storage/cpp && WITH_AZURE=OFF make python-lib
+mkdir -p ../python/milvus_storage/lib
+cp build/Release/libmilvus-storage.dylib ../python/milvus_storage/lib/
+"""
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.windows]
+before-all = "echo Windows build - C++ library build not yet supported"
+test-skip = "*"
