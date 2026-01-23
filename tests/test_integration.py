@@ -26,7 +26,7 @@ def test_version():
     import ray_milvus
 
     assert hasattr(ray_milvus, "__version__")
-    assert ray_milvus.__version__ == "0.1.0"
+    assert ray_milvus.__version__ == "0.1.1"
 
 
 class TestMilvusDatasource:
