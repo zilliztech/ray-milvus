@@ -2,8 +2,8 @@
 Integration tests for Milvus Ray datasource and datasink.
 """
 
-import tempfile
 import os
+import tempfile
 
 import numpy as np
 import pyarrow as pa
@@ -36,10 +36,12 @@ class TestMilvusDatasource:
         """Test MilvusDatasource initialization."""
         from ray_milvus import MilvusDatasource
 
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("vector", pa.list_(pa.float32())),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("vector", pa.list_(pa.float32())),
+            ]
+        )
         column_groups = ['{"segments": [{"path": "/tmp/test"}]}']
 
         datasource = MilvusDatasource(
@@ -100,10 +102,12 @@ class TestMilvusDatasink:
         """Test MilvusDatasink initialization."""
         from ray_milvus import MilvusDatasink
 
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("vector", pa.list_(pa.float32())),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("vector", pa.list_(pa.float32())),
+            ]
+        )
 
         datasink = MilvusDatasink(
             path="/tmp/test_output",
@@ -374,6 +378,7 @@ class TestWriteReadCycle:
     def test_write_to_milvus_storage(self):
         """Test writing data to Milvus storage."""
         import ray
+
         from ray_milvus import MilvusDatasink
 
         # Initialize Ray if not already
@@ -382,22 +387,29 @@ class TestWriteReadCycle:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Define schema with fixed_size_list for vectors
-            schema = pa.schema([
-                pa.field("id", pa.int64()),
-                pa.field("text", pa.string()),
-                pa.field("vector", pa.list_(pa.float32(), 4)),
-            ])
+            schema = pa.schema(
+                [
+                    pa.field("id", pa.int64()),
+                    pa.field("text", pa.string()),
+                    pa.field("vector", pa.list_(pa.float32(), 4)),
+                ]
+            )
 
             # Create PyArrow table with correct types
-            table = pa.table({
-                "id": pa.array([1, 2, 3], type=pa.int64()),
-                "text": pa.array(["hello", "world", "test"], type=pa.string()),
-                "vector": pa.array([
-                    [0.1, 0.2, 0.3, 0.4],
-                    [0.5, 0.6, 0.7, 0.8],
-                    [0.9, 1.0, 1.1, 1.2],
-                ], type=pa.list_(pa.float32(), 4)),
-            })
+            table = pa.table(
+                {
+                    "id": pa.array([1, 2, 3], type=pa.int64()),
+                    "text": pa.array(["hello", "world", "test"], type=pa.string()),
+                    "vector": pa.array(
+                        [
+                            [0.1, 0.2, 0.3, 0.4],
+                            [0.5, 0.6, 0.7, 0.8],
+                            [0.9, 1.0, 1.1, 1.2],
+                        ],
+                        type=pa.list_(pa.float32(), 4),
+                    ),
+                }
+            )
 
             # Create Ray dataset from Arrow table
             ds = ray.data.from_arrow(table)
