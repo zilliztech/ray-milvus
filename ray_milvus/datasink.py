@@ -61,7 +61,7 @@ class MilvusDatasink(Datasink):
         """Return a human-readable name for this datasink."""
         return "Milvus"
 
-    def on_write_start(self) -> None:
+    def on_write_start(self, schema=None) -> None:
         """Callback invoked when a write job begins."""
         # Writer will be initialized in write() to avoid serialization issues
         pass
